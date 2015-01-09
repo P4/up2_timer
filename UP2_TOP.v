@@ -99,5 +99,16 @@ assign LED[15:12] = ~BTD[3:0];
 wire CLK_0 = ~BTD[0];
 t_ff T0 ( .clk(CLK_0), .out(LED[0]) );
 
+// Test of UP/DOWN counter.
+wire [3:0] Q_SEC_0;
+
+wire INC = ~BTD[2]; assign LED[7] = INC;
+wire DEC = ~BTD[0]; assign LED[6] = DEC;
+
+counter #(10,4) SEC_0 ( 
+	.INC(INC), .DEC(DEC), .Q(Q_SEC_0),
+	.CARRY(LED[11]), .BORROW(LED[10])
+);
+bcd_to_7seg DISP_SEC_0 (Q_SEC_0, DISP4);
 
 endmodule
