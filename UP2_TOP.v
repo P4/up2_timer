@@ -85,4 +85,19 @@ assign FLEX_DIGIT_2_DP = 1;
 assign MATRIX_ROW = 8'hFF;
 assign MATRIX_COL = 16'hFFFF;
 
+//debouncing buttons
+wire [3:0] BTD; // 0 if pressed
+debouncer d0 ( MCLK, BT[0], BTD[0] );
+debouncer d1 ( MCLK, BT[1], BTD[1] );
+debouncer d2 ( MCLK, BT[2], BTD[2] );
+debouncer d3 ( MCLK, BT[3], BTD[3] );
+
+//LEDs for pressed buttons; ON when pressed
+assign LED[15:12] = ~BTD[3:0];
+
+// LED toggled with button
+wire CLK_0 = ~BTD[0];
+t_ff T0 ( .clk(CLK_0), .out(LED[0]) );
+
+
 endmodule
