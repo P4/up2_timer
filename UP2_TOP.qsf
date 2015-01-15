@@ -172,3 +172,4 @@ set_global_assignment -name VERILOG_FILE bcd_to_7seg.v
 set_global_assignment -name VERILOG_FILE clock_sec.v
 set_global_assignment -name VERILOG_FILE debouncer.v
 set_global_assignment -name VERILOG_FILE hold_rst.v
+set_global_assignment -name VERILOG_FILE counter_10.v
