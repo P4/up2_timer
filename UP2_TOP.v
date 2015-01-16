@@ -33,12 +33,6 @@ module UP2_TOP
 	
 	MATRIX_ROW,
 	MATRIX_COL
-	
-	//Testing
-	,MIN_1_OUT
-	,MIN_0_OUT
-	,SEC_1_OUT
-	,SEC_0_OUT
 );
 
 /*
@@ -91,89 +85,71 @@ assign FLEX_DIGIT_2_DP = 1;
 assign MATRIX_ROW = 8'hFF;
 assign MATRIX_COL = 16'hFFFF;
 
-//debouncing buttons
-wire [3:0] BTD; // 0 if pressed
+// === Buttons ===
+wire [3:0] BTD; // 0 while pressed
+// --- debouncing ---
 debouncer d0 ( MCLK, BT[0], BTD[0] );
 debouncer d1 ( MCLK, BT[1], BTD[1] );
 debouncer d2 ( MCLK, BT[2], BTD[2] );
 debouncer d3 ( MCLK, BT[3], BTD[3] );
+// --- mapping controls ---
+wire START_STOP = BTD[1]; 
+wire RESET; 			// Todo: map other buttons
+wire ADD_SEC = BTD[2];
+wire ADD_MIN;
 
 //LEDs for pressed buttons; ON when pressed
 assign LED[15:12] = ~BTD[3:0];
 
-//clock
-wire CLK_SEC;
+// === 1Hz clock ===
+wire CLK_SEC; 
 clock_sec CLOCK_SEC (MCLK, CLK_SEC);
 
 //control wires
-t_ff ENABLER ( .clk( BTD[1] ), .out(ENABLE) );
+t_ff Toggle ( .clk(START_STOP), .out(ENABLE) );
 
 wire ENABLE;
 wire ADD_1_SEC, ADD_10_SEC, SUB_1_SEC, SUB_10_SEC;
 wire ADD_1_MIN, ADD_10_MIN, SUB_1_MIN, SUB_10_MIN;
 
-// increment seconds with btd2
-assign ADD_1_SEC = BTD[2];
-
-//assign ADD_1_MIN = BTD[1];
+// can increment only while stopped
+// keep high while running
+assign ADD_1_SEC = ENABLE | ADD_SEC;
+assign ADD_1_MIN = ENABLE | ADD_MIN;
+// cut off clock while stopped
 assign SUB_1_SEC = ~ENABLE | CLK_SEC;
 
-//BCD outputs
-//output [2:0] MIN_1_OUT;
-output [3:0] MIN_1_OUT;
-output [3:0] MIN_0_OUT;
-//output [2:0] SEC_1_OUT;
-output [3:0] SEC_1_OUT;
-output [3:0] SEC_0_OUT;
+// === Timer outputs ===
+// BCD, decoded to 7 segment display
+wire [2:0] MIN_1_OUT; bcd_to_7seg DISP_MIN_1 ({1'b0,MIN_1_OUT}, DISP1);
+wire [3:0] MIN_0_OUT; bcd_to_7seg DISP_MIN_0 (MIN_0_OUT, DISP2);
+wire [2:0] SEC_1_OUT; bcd_to_7seg DISP_SEC_1 ({1'b0,SEC_1_OUT}, DISP3);
+wire [3:0] SEC_0_OUT; bcd_to_7seg DISP_SEC_0 (SEC_0_OUT, DISP4);
 
+// TODO: Add CLR to each counter
 
-
-//counters
-/*counter #(6,3) MIN_1 ( .INC(ADD_10_MIN), .DEC(SUB_10_MIN), .Q(MIN_1_OUT) );
-
-counter #(10,4) MIN_0 ( .INC(ADD_1_MIN), .DEC(SUB_1_MIN), .Q(MIN_0_OUT), 
-	.CARRY(ADD_10_MIN), .BORROW(SUB_10_MIN) );
-
-counter #(6,3) SEC_1 ( .INC(ADD_10_SEC), .DEC(SUB_10_SEC), .Q(SEC_1_OUT), 
-	//.CARRY(ADD_1_MIN), 
-	.BORROW(SUB_1_MIN) );
-	
-counter #(10,4) SEC_0 ( .INC(ADD_1_SEC), .DEC(SUB_1_SEC), .Q(SEC_0_OUT), 
-	.CARRY(ADD_10_SEC), .BORROW(SUB_10_SEC) );
-*/
-
-counter_10 MIN_1 ( 
-	.INC(ADD_10_MIN), .DEC(SUB_10_MIN), .Q(MIN_1_OUT) 
+// === Counters ===
+// --- minutes ---
+counter_6 MIN_1 ( 
+	.INC(ADD_10_MIN), 
+	.DEC(SUB_10_MIN), 
+	.Q(MIN_1_OUT) 
 	);
-
 counter_10 MIN_0 ( 
-	.INC(ADD_1_MIN), .DEC(SUB_1_MIN), .Q(MIN_0_OUT), 
-	.CARRY(ADD_10_MIN), .BORROW(SUB_10_MIN) 
+	.INC(ADD_1_MIN), .CARRY(ADD_10_MIN), 
+	.DEC(SUB_1_MIN), .BORROW(SUB_10_MIN),
+	.Q(MIN_0_OUT)
 	);
-
-counter_10 SEC_1 ( 
-	.INC(ADD_10_SEC), .DEC(SUB_10_SEC), .Q(SEC_1_OUT), 
-	.CARRY(ADD_1_MIN), .BORROW(SUB_1_MIN) 
+// --- seconds ---
+counter_6 SEC_1 ( 
+	.INC(ADD_10_SEC), //.CARRY(ADD_1_MIN), //set manually
+	.DEC(SUB_10_SEC), .BORROW(SUB_1_MIN),
+	.Q(SEC_1_OUT)
 	);
-	
 counter_10 SEC_0 ( 
-	.INC(ADD_1_SEC), .DEC(SUB_1_SEC), .Q(SEC_0_OUT), 
-	.CARRY(ADD_10_SEC), .BORROW(SUB_10_SEC) 
+	.INC(ADD_1_SEC), .CARRY(ADD_10_SEC), 
+	.DEC(SUB_1_SEC), .BORROW(SUB_10_SEC),
+	.Q(SEC_0_OUT)
 	);
-	
-
-bcd_to_7seg DISP_SEC_0 (SEC_0_OUT, DISP4);
-bcd_to_7seg DISP_SEC_1 (SEC_1_OUT, DISP3);
-
-bcd_to_7seg DISP_MIN_0 (MIN_0_OUT, DISP2);
-bcd_to_7seg DISP_MIN_1 (MIN_1_OUT, DISP1);
-
-//bcd_to_7seg DISP_SEC_1 ({1'b0,SEC_1_OUT}, DISP3);
-//bcd_to_7seg DISP_MIN_0 (MIN_0_OUT, DISP2);
-//bcd_to_7seg DISP_MIN_1 ({1'b0,MIN_1_OUT}, DISP1);
-
-// LED toggled with button
-//wire CLK_0 = ~BTD[0];
-//t_ff T0 ( .clk(CLK_0), .out(LED[0]) );
 
 endmodule

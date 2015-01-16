@@ -1,54 +1,54 @@
-// Licznik dwukierunkowy z flagami pozyczki i przeniesienia, modulo N
-
-// Uzycie: 
-// counter #(N, clog2(N) ) NAME ( INC, DEC, Q, CARRY, BORROW);
+// Licznik dekadowy dwukierunkowy z flagami pozyczki i przeniesienia
 
 module counter_10 (
-	INC, // zwieksza Q o 1
-	DEC, // zmniejsza Q o 1
-	CLR,
-	Q,   // aktualny stan Q, wartosci 0..N-1
-	CARRY, // przeniesienie, przy inkrementacji z N-1 na 0
-	BORROW // pozyczka, przy dekrementacji z 0 na N-1
+    // wejœcia aktywowane zboczem narastaj¹cym
+    // w chwili aktywacji jednego wejœcia
+    // drugie musi byæ w stanie wysokim
+
+    INC, // Q = Q+1
+    DEC, // Q = Q-1
+
+    // zerowanie, niezale¿nie od wejœæ INC,DEC
+    CLR, // zerowanie stanem wysokim
+
+    Q,   // aktualny stan Q, wartosci 0..9
+
+    // flagi zachowuj¹ siê jak wejœcia INC, DEC
+    CARRY, // przeniesienie
+    BORROW // pozyczka
 );
 
-input INC;
-input DEC;
+input INC; wire U = ~INC;
+input DEC; wire D = ~DEC;
 input CLR;
+
 output reg [3:0] Q;
 
-wire [3:0] T; 
-wire U = ~INC;
-wire D = ~DEC;
-wire X = Q[1] | Q[2] | Q[3]; 
+output CARRY = ~( U & Q[0] & Q[3] ); // U , Q=1__1
+output BORROW = ~&{D,~Q};            // D , Q=0000
 
-assign T[0] = ~( &U + &D );
-assign T[1] = ~( 
-	(Q[0] & ~Q[3] & U ) +  
-	(~Q[0] & X & D)
-);
+// choose which bits to toggle
+wire [3:0] T; //inputs for toggles
+wire X = |Q[3:1];                    // Q != 000_
+assign T[0] = ~( U | D );
+assign T[1] = ~| {
+    (U & ~Q[3] & Q[0]),              // U , Q = 0__1
+    (D & ~Q[0] & X)                  // D , Q = ___0 != 000_
+};
+assign T[2] = ~| {
+    ( U & Q[0] & Q[1] ),             // U , Q = __11
+    ( D & X & ~Q[0] & ~Q[1] )        // D , Q = __00 != 000_
+};
+assign T[3] = ~| {
+    ( U & Q[2] & Q[1] & Q[0] ),      // U , Q = _111
+    ( U & Q[3] & Q[0] ),             // U , Q = 1__1
+    ( D & ~Q[2] & ~Q[0] & ~Q[1])     // D , Q = _000
+};
 
-assign T[2] = ~ (
-	( U & Q[0] & Q[1] ) + 
-	( D & X & ~Q[0] & ~Q[1] )
-);
-assign T[3] = ~ (
-	( U & Q[0] & Q[1] & Q[2] ) +
-	( U & Q[0] & Q[3] ) +
-	( D & ~Q[0] & ~Q[1] & ~Q[2]) 
-);
-
-output CARRY = ~( U & Q[0] & Q[3] );
-output BORROW = ~( &{D,~Q} );
-
-always @(posedge T[0], posedge CLR) Q[0] <= (CLR) ? 0 : ~Q[0];
-always @(posedge T[1], posedge CLR) Q[1] <= (CLR) ? 0 : ~Q[1];
-always @(posedge T[2], posedge CLR) Q[2] <= (CLR) ? 0 : ~Q[2];
-always @(posedge T[3], posedge CLR) Q[3] <= (CLR) ? 0 : ~Q[3];
-
-//always @(negedge CLK) begin
-//	CARRY <= 0;
-//	BORROW <= 0;
-//end
+//toggle based on T
+always @(posedge T[0], posedge CLR) Q[0] <= (CLR) ? 1'b0 : ~Q[0];
+always @(posedge T[1], posedge CLR) Q[1] <= (CLR) ? 1'b0 : ~Q[1];
+always @(posedge T[2], posedge CLR) Q[2] <= (CLR) ? 1'b0 : ~Q[2];
+always @(posedge T[3], posedge CLR) Q[3] <= (CLR) ? 1'b0 : ~Q[3];
 
 endmodule
