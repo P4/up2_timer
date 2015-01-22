@@ -106,11 +106,19 @@ wire CLK_SEC;
 clock_sec CLOCK_SEC (MCLK, CLK_SEC);
 
 //control wires
-t_ff Toggle ( .clk(START_STOP), .out(ENABLE) );
+t_ff Toggle (
+	.clk(START_STOP),
+	.clr(END),
+	.out(ENABLE)
+	);
 
 wire ENABLE;
 wire ADD_1_SEC, ADD_10_SEC, SUB_1_SEC, SUB_10_SEC;
 wire ADD_1_MIN, ADD_10_MIN, SUB_1_MIN, SUB_10_MIN;
+
+// high on counting's end
+assign END = ENABLE &
+	~(SEC_0_OUT | SEC_1_OUT | MIN_0_OUT | MIN_1_OUT);
 
 // can increment only while stopped
 // keep high while running
