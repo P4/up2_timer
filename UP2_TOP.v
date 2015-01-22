@@ -93,8 +93,8 @@ debouncer d1 ( MCLK, BT[1], BTD[1] );
 debouncer d2 ( MCLK, BT[2], BTD[2] );
 debouncer d3 ( MCLK, BT[3], BTD[3] );
 // --- mapping controls ---
-wire START_STOP = BTD[1]; 
-wire RESET; 			// Todo: map other buttons
+wire RESET = BTD[0];
+wire START_STOP = BTD[1]; 			// Todo: map other buttons
 wire ADD_SEC = BTD[2];
 wire ADD_MIN;
 
@@ -116,6 +116,9 @@ wire ADD_1_MIN, ADD_10_MIN, SUB_1_MIN, SUB_10_MIN;
 // keep high while running
 assign ADD_1_SEC = ENABLE | ADD_SEC;
 assign ADD_1_MIN = ENABLE | ADD_MIN;
+// can reset only while stopped
+// keep high while running
+assign RST = ENABLE | RESET;
 // cut off clock while stopped
 assign SUB_1_SEC = ~ENABLE | CLK_SEC;
 
@@ -132,23 +135,27 @@ wire [3:0] SEC_0_OUT; bcd_to_7seg DISP_SEC_0 (SEC_0_OUT, DISP4);
 // --- minutes ---
 counter_6 MIN_1 ( 
 	.INC(ADD_10_MIN), 
-	.DEC(SUB_10_MIN), 
+	.DEC(SUB_10_MIN),
+	.CLR(RST), 
 	.Q(MIN_1_OUT) 
 	);
 counter_10 MIN_0 ( 
 	.INC(ADD_1_MIN), .CARRY(ADD_10_MIN), 
 	.DEC(SUB_1_MIN), .BORROW(SUB_10_MIN),
+	.CLR(RST),
 	.Q(MIN_0_OUT)
 	);
 // --- seconds ---
 counter_6 SEC_1 ( 
 	.INC(ADD_10_SEC), //.CARRY(ADD_1_MIN), //set manually
 	.DEC(SUB_10_SEC), .BORROW(SUB_1_MIN),
+	.CLR(RST),
 	.Q(SEC_1_OUT)
 	);
 counter_10 SEC_0 ( 
 	.INC(ADD_1_SEC), .CARRY(ADD_10_SEC), 
 	.DEC(SUB_1_SEC), .BORROW(SUB_10_SEC),
+	.CLR(RST),
 	.Q(SEC_0_OUT)
 	);
 
