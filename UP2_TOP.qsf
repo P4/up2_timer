@@ -174,3 +174,4 @@ set_global_assignment -name VERILOG_FILE debouncer.v
 set_global_assignment -name VERILOG_FILE t_ff.v
 set_global_assignment -name INCREMENTAL_VECTOR_INPUT_SOURCE UP2_TOP.vwf
 set_global_assignment -name VECTOR_WAVEFORM_FILE reset_test.vwf
+set_global_assignment -name VERILOG_FILE mode.v

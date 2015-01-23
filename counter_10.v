@@ -46,9 +46,9 @@ assign T[3] = ~| {
 };
 
 //toggle based on T
-always @(posedge T[0], posedge CLR) Q[0] <= (CLR) ? 1'b0 : ~Q[0];
-always @(posedge T[1], posedge CLR) Q[1] <= (CLR) ? 1'b0 : ~Q[1];
-always @(posedge T[2], posedge CLR) Q[2] <= (CLR) ? 1'b0 : ~Q[2];
-always @(posedge T[3], posedge CLR) Q[3] <= (CLR) ? 1'b0 : ~Q[3];
+always @(posedge T[0], negedge CLR) Q[0] <= (~CLR) ? 1'b0 : ~Q[0];
+always @(posedge T[1], negedge CLR) Q[1] <= (~CLR) ? 1'b0 : ~Q[1];
+always @(posedge T[2], negedge CLR) Q[2] <= (~CLR) ? 1'b0 : ~Q[2];
+always @(posedge T[3], negedge CLR) Q[3] <= (~CLR) ? 1'b0 : ~Q[3];
 
 endmodule

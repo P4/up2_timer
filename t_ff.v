@@ -6,6 +6,6 @@ module t_ff
 	output reg out
 );
 
-always @(posedge clk) out <= (clr) ? 1'b0 : ~out;
+always @(posedge clk, negedge clr) out <= (~clr) ? 1'b0 : ~out;
 
 endmodule

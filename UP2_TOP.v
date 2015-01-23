@@ -87,38 +87,44 @@ assign MATRIX_COL = 16'hFFFF;
 
 // === Buttons ===
 wire [3:0] BTD; // 0 while pressed
-// --- debouncing ---
-debouncer d0 ( MCLK, BT[0], BTD[0] );
-debouncer d1 ( MCLK, BT[1], BTD[1] );
-debouncer d2 ( MCLK, BT[2], BTD[2] );
-debouncer d3 ( MCLK, BT[3], BTD[3] );
 // --- mapping controls ---
-wire RESET = BTD[0];
-wire START_STOP = BTD[1]; 			// Todo: map other buttons
-wire ADD_SEC = BTD[2];
-wire ADD_MIN;
-
-//LEDs for pressed buttons; ON when pressed
-assign LED[15:12] = ~BTD[3:0];
+wire RESET, START_STOP, ADD_SEC, ADD_MIN;
+// --- debouncing ---
+debouncer d0 ( MCLK, BT[0], START_STOP );
+debouncer d1 ( MCLK, BT[1], RESET );
+debouncer d2 ( MCLK, BT[2], ADD_SEC );
+debouncer d3 ( MCLK, BT[3], ADD_MIN );
 
 // === 1Hz clock ===
 wire CLK_SEC; 
 clock_sec CLOCK_SEC (MCLK, CLK_SEC);
 
 //control wires
-t_ff Toggle (
+/*t_ff Toggle (
 	.clk(START_STOP),
 	.clr(END),
 	.out(ENABLE)
 	);
+*/
 
-wire ENABLE;
+mode Mode (
+	.btn(START_STOP),
+	.end_(END),
+	.running(ENABLE),
+	.ended(BLINK),
+);
+wire ENABLE, BLINK;
 wire ADD_1_SEC, ADD_10_SEC, SUB_1_SEC, SUB_10_SEC;
 wire ADD_1_MIN, ADD_10_MIN, SUB_1_MIN, SUB_10_MIN;
 
 // high on counting's end
 assign END = ENABLE &
 	~(SEC_0_OUT | SEC_1_OUT | MIN_0_OUT | MIN_1_OUT);
+
+// low when counting ends
+assign END = ~ENABLE | |{SEC_0_OUT,SEC_1_OUT,MIN_0_OUT,MIN_1_OUT};
+
+assign DISP1_DP = CLK_SEC & BLINK;
 
 // can increment only while stopped
 // keep high while running
