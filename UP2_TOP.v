@@ -86,7 +86,6 @@ assign MATRIX_ROW = 8'hFF;
 assign MATRIX_COL = 16'hFFFF;
 
 // === Buttons ===
-
 // --- mapping controls ---
 wire RESET, START_STOP, ADD_SEC, ADD_MIN;
 // --- debouncing ---
@@ -140,6 +139,8 @@ wire [3:0] SEC_0_OUT; wire [6:0] SEC_0_SEG; bcd_to_7seg Dec_SEC_0 (SEC_0_OUT, SE
 // gated behind blinker
 wire BLINK = CLK_SEC & ENDED;
 assign {DISP4,DISP3,DISP2,DISP1} = {28{BLINK}} & {MIN_1_SEG,MIN_0_SEG,SEC_1_SEG,SEC_0_SEG};
+// separate minutes from seconds
+assign DISP3_DP = 1'b1;
 
 // TODO: Add CLR to each counter
 
