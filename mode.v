@@ -11,7 +11,7 @@ always @(posedge btn, negedge end_)
 		{running,ended} <= (running) ? 2'b01 : {running,ended};
 	end
 	else begin
-		running <= (ended) ? 0 : ~running;
+		running <= (ended) ? 1'b0 : ~running;
 		ended <= 1'b0;
 	end
 

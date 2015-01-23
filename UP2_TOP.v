@@ -86,7 +86,7 @@ assign MATRIX_ROW = 8'hFF;
 assign MATRIX_COL = 16'hFFFF;
 
 // === Buttons ===
-wire [3:0] BTD; // 0 while pressed
+
 // --- mapping controls ---
 wire RESET, START_STOP, ADD_SEC, ADD_MIN;
 // --- debouncing ---
@@ -106,26 +106,20 @@ clock_sec CLOCK_SEC (MCLK, CLK_SEC);
 	.out(ENABLE)
 	);
 */
+wire ENABLE, END, ENDED;
+// low when counting ends
+assign END = ~ENABLE | |{SEC_0_OUT,SEC_1_OUT,MIN_0_OUT,MIN_1_OUT};
 
+// mode switch
 mode Mode (
 	.btn(START_STOP),
 	.end_(END),
 	.running(ENABLE),
-	.ended(BLINK),
+	.ended(ENDED),
 );
-wire ENABLE, BLINK;
+
 wire ADD_1_SEC, ADD_10_SEC, SUB_1_SEC, SUB_10_SEC;
 wire ADD_1_MIN, ADD_10_MIN, SUB_1_MIN, SUB_10_MIN;
-
-// high on counting's end
-assign END = ENABLE &
-	~(SEC_0_OUT | SEC_1_OUT | MIN_0_OUT | MIN_1_OUT);
-
-// low when counting ends
-assign END = ~ENABLE | |{SEC_0_OUT,SEC_1_OUT,MIN_0_OUT,MIN_1_OUT};
-
-assign DISP1_DP = CLK_SEC & BLINK;
-
 // can increment only while stopped
 // keep high while running
 assign ADD_1_SEC = ENABLE | ADD_SEC;
@@ -138,10 +132,14 @@ assign SUB_1_SEC = ~ENABLE | CLK_SEC;
 
 // === Timer outputs ===
 // BCD, decoded to 7 segment display
-wire [2:0] MIN_1_OUT; bcd_to_7seg DISP_MIN_1 ({1'b0,MIN_1_OUT}, DISP1);
-wire [3:0] MIN_0_OUT; bcd_to_7seg DISP_MIN_0 (MIN_0_OUT, DISP2);
-wire [2:0] SEC_1_OUT; bcd_to_7seg DISP_SEC_1 ({1'b0,SEC_1_OUT}, DISP3);
-wire [3:0] SEC_0_OUT; bcd_to_7seg DISP_SEC_0 (SEC_0_OUT, DISP4);
+wire [2:0] MIN_1_OUT; wire [6:0] MIN_1_SEG; bcd_to_7seg Dec_MIN_1 ({1'b0,MIN_1_OUT}, MIN_1_SEG);
+wire [3:0] MIN_0_OUT; wire [6:0] MIN_0_SEG; bcd_to_7seg Dec_MIN_0 (MIN_0_OUT, MIN_0_SEG);
+wire [2:0] SEC_1_OUT; wire [6:0] SEC_1_SEG; bcd_to_7seg Dec_SEC_1 ({1'b0,SEC_1_OUT}, SEC_1_SEG);
+wire [3:0] SEC_0_OUT; wire [6:0] SEC_0_SEG; bcd_to_7seg Dec_SEC_0 (SEC_0_OUT, SEC_0_SEG);
+
+// gated behind blinker
+wire BLINK = CLK_SEC & ENDED;
+assign {DISP4,DISP3,DISP2,DISP1} = {28{BLINK}} & {MIN_1_SEG,MIN_0_SEG,SEC_1_SEG,SEC_0_SEG};
 
 // TODO: Add CLR to each counter
 
