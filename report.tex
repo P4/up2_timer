@@ -3,10 +3,15 @@
 \usepackage[utf8]{inputenc}
 \usepackage{polski}
 
+\newcommand{\startstop}{\texttt{START/STOP}}
+\newcommand{\reset}{\texttt{RESET}}
+\newcommand{\addmin}{\texttt{ADD\textunderscore MIN}}
+\newcommand{\addsec}{\texttt{ADD\textunderscore SEC}}
+
 \title{
 	\textbf{Technika cyfrowa}
 	\\
-	Timer (mm:ss) z ustawianiem czasu
+	Timer (\texttt{MM:SS}) z ustawianiem czasu
 	}
 \author{
 	Paweł Maniecki\\
@@ -21,6 +26,26 @@
 
 \chapter{Instrukcja użytkownika}
 \section{Opis działania}
+
+Celem projektu jest \emph{timer} zrealizowany na zestawie
+edukacyjnym Altera UP2.
+
+Timer wyposażony jest w licznik czasu (\texttt{MM:SS}), którego
+stan widoczny jest na wyświetlaczu. Z punktu widzenia użytkownika
+układ może znajdować się w jednym z dwóch trybów, pomiędzy którymi
+można przestawiać się przyciskiem \startstop :
+\begin{enumerate}
+\item Tryb \emph{zliczania}.\\
+W tym trybie licznik zlicza czas w dół. Działanie przycisków
+\reset , \addmin\ i \addsec\ jest zablokowane.
+\item Tryb \emph{ustawiania}.\\
+W tym trybie zliczanie czasu jest zatrzymane. Możliwe jest
+dodawanie minut i/lub sekund do licznika przyciskami \addmin\ i
+\addsec\ oraz zresetowanie jego stanu przyciskiem \reset .
+\end{enumerate}
+Gdy licznik osiągnie stan \texttt{00:00}, układ zasygnalizuje to
+miganiem kropek na wyświetlaczu LED. Po wciśnięciu przycisku
+\startstop\ timer powróci do trybu \emph{ustawiania}.
 \section{Opis interfejsu użytkownika}
 % tu można wstawić rysunek układu
 
@@ -28,4 +53,4 @@
 \section{Symulacja układu w Multisimie}
 \section{Implementacja układu w HDL}
 
-\end{document}          
+\end{document}
