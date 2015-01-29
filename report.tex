@@ -140,14 +140,25 @@ dodawanie minut i/lub sekund do licznika przyciskami \addmin\ i
 \addsec\ oraz zresetowanie jego stanu przyciskiem \reset .
 \end{enumerate}
 Gdy licznik podczas zliczania osiągnie stan \texttt{00:00}, układ
-zasygnalizuje to miganiem kropek na wyświetlaczu LED. Po
+zasygnalizuje to miganiem cyfr na wyświetlaczach LED. Po
 wciśnięciu przycisku \startstop\ timer powróci do trybu
 \emph{ustawiania}.
 \section{Opis interfejsu użytkownika.}
-Interfejs użytkownika składa się z:
+Aktualny stan timera w fromacie \texttt{MM.SS} wyświetlany jest na czterech wyświetlaczach 
+7-segmentowych znajdujących się na \emph{płytce rozszerzeń C}. 
+
+Sterowanie układem odbywa się w całości przy pomocy przycisków chwilowych na \emph{płytce A}. 
+Układ przycisków, ich oznaczenia na płytce i nazwy używane w instrukcji widoczne są poniżej:
+\begin{table}[h] \centering
+  \renewcommand{\arraystretch}{2}
+  \begin{tabular}{r|c|c|l} \cline{2-3}
+  \addmin & \texttt{BT3} & \texttt{BT2} & \addsec    \\ \cline{2-3}
+  \reset  & \texttt{BT1} & \texttt{BT0} & \startstop \\ \cline{2-3}
+  \end{tabular}
+\end{table}
+
+Funkcje przycisków:
 \begin{itemize}
-\item Przycisków:
-	\begin{itemize}
 	\item \startstop\ --- zatrzymywanie/uruchamianie timera
 	\item \addsec\ --- dodawanie sekund do licznika (tylko w trybie
 		\emph{ustawiania})
@@ -155,9 +166,6 @@ Interfejs użytkownika składa się z:
 		\emph{ustawiania})
 	\item \reset\ --- resetowanie timera (tylko w trybie
 		\emph{ustawiania})
-	\end{itemize}
-\item Czterech 7-segmentowych wyświetlaczy LED --- wyświetlanie
-bieżącego stanu timera.
 \end{itemize}
 
 \chapter{Realizacja projektu}
@@ -192,20 +200,23 @@ stanu. Do tych wejść podłączony jest przycisk \reset .
 \subsection{Implementacja w HDL.}
 Poniżej przedstawiamy nadrzędny plik źródłowy projektu napisany w
 języku Verilog. Występują w nim odniesienia do modułów, które
-zostaną opisane w dalszej części sprawozdania.
+zostaną opisane w dalszej części sprawozdania. 
+Pewne fragmenty zostały pominięte dla poprawy czytelności
 
 \lstinputlisting[title=\texttt{UP2\textunderscore TOP.v}]{UP2_TOP_simp.v}
 \section{Zegar 1Hz (\clocksec).}
 \subsection{Opis układu.}
-Do realizacji timera kluczowym elementem był \emph{zegar 1Hz}.
-Umożliwia on dokładne odmierzenie jednej sekundy.
+Do realizacji timera kluczowym elementem był \emph{zegar 1Hz},
+umożliwiający dokładne odmierzenie jednej sekundy. 
+W celu uzyskania z zegara 25,175MHz pożądanej częstotliwości, 
+zastosowaliśmy preskaler.
 
-Układ ten to prosty licznik na zegarze o częstotliwości 25,175MHz
-z 24-bitowym rejestrem. Wyjście zegara sekundowego połączone
-jest z ostatnim (najstarszym) bitem rejestru. Rejestr jest
-zerowany, gdy licznik osiąga \texttt{FREQ-1}, co powoduje, że
-częstotliwość występowania zbocza wynosi 1Hz. Należy jednak
+Układ preskalera to 25-bitowy licznik modulo 25\,175\,000. 
+Wyjście preskalera stanowi najstarszy, 24-ty bit jego rejestru. 
+Rejestr jest zerowany, gdy licznik osiąga 25\,174\,999, co powoduje, że
+częstotliwość sygnału wyjściowego wynosi 1Hz. Należy jednak
 zaznaczyć, że wypełnienie zegara \emph{nie} jest równe 50\% .
+
 \subsection{Implementacja w HDL.}
 Z powodu zbyt dużego skomplikowania tego układu nie wykonaliśmy
 symulacji w Multisimie. Poniżej zamieszczamy implementację zegara
@@ -217,26 +228,27 @@ symulacji w Multisimie. Poniżej zamieszczamy implementację zegara
 Podczas realizacji naszego projektu jednym z pierwszych problemów,
 na jakie się natknęliśmy, były zakłócenia na stykach przycisków,
 które występują w czasie naciskania. Dość szybko zdaliśmy sobie
-sprawę, że potrzebujemy układu, który znany jest pod nazwą
-\emph{debouncer}.
+sprawę, że potrzebujemy układu, który będzie te drgania eliminował,
+znanego pod nazwą \emph{debouncer}.
 
-Jego działanie polega na tym, że stan na jego wyjściu zmienia się
-dopiero wtedy, gdy zmiana stanu przycisku jest trwała, tj.\
-trwa przez określony czas. Dzięki temu, sygnał na wyjściu
-debouncera jest pozbawiony drgań. Minimalny czas $P$ potwierdzający
-stabilność wyraża wzór:
+Działanie debouncera polega na pomiarze czasu w jakim przycisk 
+znajduje się w podanym stanie i rejestrowaniu przełączenia tylko 
+gdy czas ten osiągnie pewną minimalną wartość. 
+Minimalny czas $P$ potwierdzający stabilność zmiany wyraża wzór:
+$$ 
+P = \frac{2^N}{f} 
 $$
-P = \frac{2^N}{f}
-$$
-Zakładamy czas ok. 10ms,
+
+Wartość P zależna jest od konstrukcji przycisku i może być wyznaczona
+eksperymentalnie. Dla przycisków stosowanych w naszym projekcie przyjęliśmy
+$P \approx 10\mathrm{ms}$.
 $$
 N = \lfloor\log_2(Pf)\rfloor
 $$
 Dla zegara 25,175MHz daje nam to $N=18$\ ($P=10,41$ms)
 \subsection{Implementacja w HDL.}
-W naszym projekcie zakładamy, że wszystkie wejścia doprowadzone z
-przycisków są już zdebouncowane. Poniżej przedstawiamy jedynie
-implementację w Verilogu.
+Przełączniki stosowane przez nas w Multisimie na szczęście nie wymagają
+debouncera. Poniżej przedstawiamy implementację w Verilogu.
 
 \lstinputlisting[title=\debouncer .v]{debouncer.v}
 \section{Liczniki (\counter{6}, \counter{10}).}
@@ -283,7 +295,7 @@ znajdować w jednym z trzech \emph{trybów}: \texttt{RUN},
 \texttt{HALT} i \texttt{BLINK} (wyjaśnienie poniżej). Dwa pierwsze
 tryby mają większe znaczenie dla użytkownika i zostały opisane w
 instrukcji, zaś trzeci z nich został wprowadzony po to, by
-umożliwić sygnalizację zakończenia zliczania (miganie kropek
+umożliwić sygnalizację zakończenia zliczania (miganie cyfr
 na wyświetlaczu LED).
 
 Z bardzo prostych obliczeń wynika, że chcąc zapamiętać 3 stany

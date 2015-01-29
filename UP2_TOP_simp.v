@@ -31,9 +31,7 @@ output [6:0] DISP4; output DISP4_DP;
 
 //...
 
-/*
-	==== functionality ====
-*/
+/* ==== functionality ==== */
 
 //...
 
@@ -51,12 +49,6 @@ wire CLK_SEC;
 clock_sec CLOCK_SEC (MCLK, CLK_SEC);
 
 //control wires
-/*t_ff Toggle (
-	.clk(START_STOP),
-	.clr(END),
-	.out(ENABLE)
-	);
-*/
 wire ENABLE, END, ENDED;
 // low when counting ends
 assign END = ~ENABLE | |{SEC_0_OUT,SEC_1_OUT,MIN_0_OUT,MIN_1_OUT};
