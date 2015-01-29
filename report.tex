@@ -119,7 +119,6 @@
 \maketitle
 
 \tableofcontents
-\listoffigures
 
 \chapter{Instrukcja użytkownika}
 \section{Opis działania.}
@@ -149,12 +148,33 @@ wciśnięciu przycisku \startstop\ timer powróci do trybu
 \chapter{Realizacja projektu}
 \section{Układ timera.}
 \subsection{Ogólny schemat.}
+Układ timera oparty jest na czterech licznikach: dwóch licznikach
+modulo 6 oraz dwóch --- modulo 10. Poniżej przedstawiamy
+uproszczony schemat układu, który ułatwia zrozumienie jego idei.
+
+Każdy licznik odpowiada za jedną z cyfr wg schematu: \texttt{MM:SS}.
+Cyfry jedności należą do przedziału [0..9], zaś cyfry dziesiątek ---
+[0..5]. \emph{Przeniesienia} cyfr jedności połączone są z wejściami
+cyfr dziesiątek odpowiadających za \emph{inkrementację}.
+Analogicznie, \emph{pożyczki} połączone są z wejściami
+\emph{dekrementacji}. Do wejść licznika sekundowych cyfr jedności
+poprowadzone są sygnały odpowiednio: sygnał pochodzący z przycisku
+\addsec\ do inkrementacji, sygnał zegara 1Hz, poprzez odpowiedni
+przełącznik (szczegóły w dalszej części sprawozdania) --- do
+dekrementacji. Do wejść licznika minutowych cyfr jedności
+doprowadzone są sygnały: do wejścia inkrementacji --- sygnał z
+przycisku \addmin , zaś do dekrementacji --- pożyczka z sekundowej
+cyfry jedności. Oprócz tego, wszystkie liczniki posiadają wejście
+\texttt{CLR}, które służy do \emph{asynchronicznego} resetowania
+stanu. Do tych wejść podłączony jest przycisk \reset .
+\\ \\
+\includegraphics[width=\textwidth]{multisim/timer.png}
 \subsection{Implementacja w HDL.}
 Poniżej przedstawiamy nadrzędny plik źródłowy projektu napisany w
 języku Verilog. Występują w nim odniesienia do modułów, które
 zostaną opisane w dalszej części sprawozdania.
 
-\lstinputlisting[title=\texttt{UP2\textunderscore TOP.v}]{UP2_TOP.v}
+\lstinputlisting[title=\texttt{UP2\textunderscore TOP.v}]{UP2_TOP_simp.v}
 \section{Zegar 1Hz (\clocksec).}
 \subsection{Opis układu.}
 Do realizacji timera kluczowym elementem był \emph{zegar 1Hz}.
@@ -210,6 +230,16 @@ licznika odpowiadającego za starszą cyfrę.
 
 \counter{6} to licznik modulo 6, zaś \counter{10} --- modulo 10.
 \subsection{Symulacja w Multisimie.}
+Licznik modulo 6 to układ \emph{sekwencyjny} zbudowany na trzech
+przerzutnikach. Sygnał podawany na wejście każdego przerzutnika jest
+\emph{dekodowany} na podstawie aktualnego stanu wyjść licznika.
+\\ \\
+\includegraphics[width=\textwidth]{multisim/counter6.png}
+Licznik modulo 10 jest zbudowany podobnie. Główną różnicą jest tutaj
+zastosowanie czterech przerzutników, co pozwala na zapamiętanie
+wszystkich cyfr systemu dziesiętnego.
+\\ \\
+\includegraphics[width=\textwidth]{multisim/counter10.png}
 \subsection{Implementacja w HDL.}
 Implementacja liczników w Verilogu to wyrażenie wcześniej
 przedstawionych schematów w języku opisu sprzętu.
@@ -245,7 +275,7 @@ koniec zliczania.
 \end{enumerate}
 
 Rysunek \ref{state_diagram} prezentuje przejścia pomiędzy trybami.
-\begin{figure}[p]
+\begin{figure}[htbp]
 \centering
 \includegraphics{state_diagram.pdf}
 \caption[Diagram przejść pomiędzy trybami timera.]{Diagram przejść
@@ -370,6 +400,7 @@ G &= Q_3 + \n{Q_0}Q_1 + Q_1\n{Q_2} + \n{Q_1}Q_2 &
 \end{align*}
 
 \subsection{Symulacja w Multisimie.}
+\includegraphics[width=\textwidth]{multisim/bcdto7seg.png}
 \subsection{Implementacja w HDL.}
 Aby zaimplementować dekoder w Verilogu wystarczy podać, jakiego
 zestawu stanów na wyjściu oczekujemy dla każdego zestawu stanów na
