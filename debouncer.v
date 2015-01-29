@@ -1,9 +1,3 @@
-// Minimalny czas P potwierdzajacy stabilnosc wyraza wzor:
-//     P = 2^N / f
-// zakladamy czas ok. 10ms,
-//	   N = log2(Pf), zaokroglone w dol
-// dla zegara 25,175Mhz daje nam to N=18 (p=10.41ms)
-
 module debouncer 
 (
 	input clk, // zegar (np. globalny 25,175MHz)

@@ -1,5 +1,3 @@
-// Dekoder BCD dla wyswietlacza 7 segmentowego
-
 module bcd_to_7seg (
 
 input [3:0] IN,

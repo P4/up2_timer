@@ -103,7 +103,7 @@ Z powodu zbyt dużego skomplikowania tego układu nie wykonaliśmy
 symulacji w Multisimie. Poniżej zamieszczamy implementację zegara
 1Hz w Verilogu.
 
-\lstinputlisting[title=\texttt{clock\textunderscore sec.v}]{clock_sec.v}
+\lstinputlisting[title=\clocksec .v]{clock_sec.v}
 \section{Debouncer (\debouncer).}
 \subsection{Opis układu.}
 Podczas realizacji naszego projektu jednym z pierwszych problemów,
@@ -115,13 +115,22 @@ sprawę, że potrzebujemy układu, który znany jest pod nazwą
 Jego działanie polega na tym, że stan na jego wyjściu zmienia się
 dopiero wtedy, gdy zmiana stanu przycisku jest trwała, tj.\
 trwa przez określony czas. Dzięki temu, sygnał na wyjściu
-debouncera jest pozbawiony drgań.
+debouncera jest pozbawiony drgań. Minimalny czas $P$ potwierdzający
+stabilność wyraża wzór:
+$$
+P = \frac{2^N}{f}
+$$
+Zakładamy czas ok. 10ms,
+$$
+N = \lfloor\log_2(Pf)\rfloor
+$$
+Dla zegara 25,175MHz daje nam to $N=18$\ ($P=10,41$ms)
 \subsection{Implementacja w HDL.}
 W naszym projekcie zakładamy, że wszystkie wejścia doprowadzone z
 przycisków są już zdebouncowane. Poniżej przedstawiamy jedynie
 implementację w Verilogu.
 
-\lstinputlisting[title=\texttt{debouncer.v}]{debouncer.v}
+\lstinputlisting[title=\debouncer .v]{debouncer.v}
 \section{Liczniki (\counter{6}, \counter{10}).}
 \subsection{Opis układu.}
 \emph{Liczniki} to serce naszego układu. Odliczają w dół lub w
@@ -138,7 +147,26 @@ licznika odpowiadającego za starszą cyfrę.
 \subsection{Implementacja w HDL.}
 \section{Dekoder BCD na wyświetlacz 7-segmentowy (\bcdtoseg).}
 \subsection{Opis układu.}
+Aby użytkownik mógł widzieć stan timera na wyświetlaczu LED,
+niezbędne jest \emph{zdekodowanie} sygnału pochodzącego od
+liczników, w których cyfry pamiętane są w formacie BCD (Binary
+Coded Decimal), na odpowiednie wejścia wyświetlacza 7-segmentowego.
+W tym celu zbudowaliśmy układ, który nazwaliśmy \emph{Dekoderem
+BCD na wyświetlacz 7-segmentowy}.
+
+Dekoder jest układem \emph{kombinacyjnym}. To oznacza, że sygnał na
+wyjściu zależy tylko i wyłącznie od sygnału na wejściu, w
+odróżnieniu od układów \emph{sekwencyjnych}. Stan każdego wyjścia
+jest opisany funkcją bool'owską, które realizowane są za pomocą
+bramek logicznych.
 \subsection{Symulacja w Multisimie.}
 \subsection{Implementacja w HDL.}
+Aby zaimplementować dekoder w Verilogu wystarczy podać, jakiego
+zestawu stanów na wyjściu oczekujemy dla każdego zestawu stanów na
+wejściu. Kompilator automatycznie będzie się starał zoptymalizować
+układ bramek logicznych realizujący podaną w ten sposób
+\emph{tabelę prawdy}.
+
+\lstinputlisting[title=\bcdtoseg .v]{bcd_to_7seg.v}
 
 \end{document}
