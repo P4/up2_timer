@@ -5,6 +5,8 @@
 \usepackage{color}
 \usepackage{listings}
 \usepackage[pdftex]{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{matrix,calc}
 
 \newcommand{\startstop}{\texttt{START/STOP}}
 \newcommand{\reset}{\texttt{RESET}}
@@ -16,6 +18,67 @@
 \newcommand{\mode}{\texttt{mode}}
 \newcommand{\bcdtoseg}{\texttt{bcd\textunderscore to\textunderscore 7seg}}
 \newcommand{\tff}{\texttt{t\textunderscore ff}}
+
+%% Karnaugh
+\def\n#1{\overline{#1}}
+\def\s#1{\scriptsize #1}
+%Empty Karnaugh map 4x4
+\newenvironment{Karnaugh}{
+\begin{tikzpicture}[baseline=(current bounding box.north),scale=0.8]
+\draw (0,0) grid (4,4);
+%
+\matrix (mapa) [matrix of nodes,
+        column sep={0.8cm,between origins},
+        row sep={0.8cm,between origins},
+        every node/.style={minimum size=0.3mm},
+        anchor=2.center,
+        ampersand replacement=\&] at (0.5,0.5)
+{
+|(name)| \phantom{F}   \& 
+|(c00)| \s$\n{Q_3Q_2}$  \& 
+|(c01)| \s$\n{Q_3}Q_2$  \& 
+|(c11)| \s$Q_3Q_2$      \& 
+|(c10)| \s$Q_3\n{Q_2}$  \& 
+|(cf)| \phantom{00} \\
+%
+|(r00)| \s$\n{Q_1Q_0}$ \& |(0)|  \phantom{0} \& |(4)|  \phantom{0} \& |(12)| \phantom{0} \& |(8)|  \phantom{0} \& \\
+|(r01)| \s$\n{Q_1}Q_0$ \& |(1)|  \phantom{0} \& |(5)|  \phantom{0} \& |(13)| \phantom{0} \& |(9)|  \phantom{0} \& \\
+|(r11)| \s$Q_1Q_0$     \& |(3)|  \phantom{0} \& |(7)|  \phantom{0} \& |(15)| \phantom{0} \& |(11)| \phantom{0} \& \\
+|(r10)| \s$Q_1\n{Q_0}$ \& |(2)|  \phantom{0} \& |(6)|  \phantom{0} \& |(14)| \phantom{0} \& |(10)| \phantom{0} \& \\
+|(rf) | \phantom{00}   \&                    \&                    \&                    \&                    \& \\
+};
+}{\end{tikzpicture}}
+
+\newcommand{\contingut}[1]{% fill values
+  \foreach \x [count=\xi from 0] in {#1} 
+    \path (\xi) node {\x};
+}
+% Grouping on Karnaugh maps
+\newcommand{\grpone}[3][0]{ % group one [padding] {node} {color}
+\draw[rounded corners=3pt, fill=#3, opacity=0.3] ($(#2.north west)+(135:#1)$) rectangle ($(#2.south east)+(-45:#1)$);
+}
+\newcommand{\grp}[4][0]{ % group internal [padding] {top-left} {bottom-right} {color}
+\draw[rounded corners=3pt, fill=#4, opacity=0.3] ($(#2.north west)+(135:#1)$) rectangle ($(#3.south east)+(-45:#1)$);
+}
+\newcommand{\grph}[4][0]{ % group lateral borders [padding] {top-left} {bottom-right} {color}
+\draw[rounded corners=3pt, fill=#4, opacity=0.3] ($(rf.east |- #2.north)+(90:#1)$)-| ($(#2.east)+(0:#1)$) |- ($(rf.east |- #3.south)+(-90:#1)$);
+\draw[rounded corners=3pt, fill=#4, opacity=0.3] ($(cf.west |- #2.north)+(90:#1)$) -| ($(#3.west)+(180:#1)$) |- ($(cf.west |- #3.south)+(-90:#1)$);
+}
+\newcommand{\grpv}[4][0]{ % group top-bottom borders [padding] {top-left} {bottom-right} {color}
+\draw[rounded corners=3pt, fill=#4, opacity=0.3] ($(cf.south -| #2.west)+(180:#1)$) |- ($(#2.south)+(-90:#1)$) -| ($(cf.south -| #3.east)+(0:#1)$);
+\draw[rounded corners=3pt, fill=#4, opacity=0.3] ($(rf.north -| #2.west)+(180:#1)$) |- ($(#3.north)+(90:#1)$) -| ($(rf.north -| #3.east)+(0:#1)$);
+}
+\newcommand{\grpc}[2][0]{ % group corners [padding] {color}
+\draw[rounded corners=3pt, opacity=.3] ($(rf.east |- 0.south)+(-90:#1)$) -| ($(0.east |- cf.south)+(0:#1)$);
+\draw[rounded corners=3pt, opacity=.3] ($(rf.east |- 2.north)+(90:#1)$) -| ($(2.east |- rf.north)+(0:#1)$);
+\draw[rounded corners=3pt, opacity=.3] ($(cf.west |- 8.south)+(-90:#1)$) -| ($(8.west |- cf.south)+(180:#1)$);
+\draw[rounded corners=3pt, opacity=.3] ($(cf.west |- 10.north)+(90:#1)$) -| ($(10.west |- rf.north)+(180:#1)$);
+\fill[rounded corners=3pt, fill=#2, opacity=.3] ($(rf.east |- 0.south)+(-90:#1)$) -|  ($(0.east |- cf.south)+(0:#1)$) [sharp corners] ($(rf.east |- 0.south)+(-90:#1)$) |-  ($(0.east |- cf.south)+(0:#1)$) ;
+\fill[rounded corners=3pt, fill=#2, opacity=.3] ($(rf.east |- 2.north)+(90:#1)$) -| ($(2.east |- rf.north)+(0:#1)$) [sharp corners] ($(rf.east |- 2.north)+(90:#1)$) |- ($(2.east |- rf.north)+(0:#1)$) ;
+\fill[rounded corners=3pt, fill=#2, opacity=.3] ($(cf.west |- 8.south)+(-90:#1)$) -| ($(8.west |- cf.south)+(180:#1)$) [sharp corners]($(cf.west |- 8.south)+(-90:#1)$) |- ($(8.west |- cf.south)+(180:#1)$) ;
+\fill[rounded corners=3pt, fill=#2, opacity=.3] ($(cf.west |- 10.north)+(90:#1)$) -| ($(10.west |- rf.north)+(180:#1)$) [sharp corners] ($(cf.west |- 10.north)+(90:#1)$) |- ($(10.west |- rf.north)+(180:#1)$) ;
+}
+% Karnaugh ends here
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -211,6 +274,69 @@ wyjściu zależy tylko i wyłącznie od sygnału na wejściu, w
 odróżnieniu od układów \emph{sekwencyjnych}. Stan każdego wyjścia
 jest opisany funkcją bool'owską, które realizowane są za pomocą
 bramek logicznych.
+
+\begin{table}[h] \caption{Tabela stanów logicznych} \label{decoder-table} \centering
+\begin{tabular}{|c|cccc|ccccccc|} 
+\hline 
+& \multicolumn{4}{c|}{BCD} & \multicolumn{7}{c|}{7 segmentowy} \\
+N  & Q3   & Q2   & Q1   & Q0  & G   & F  & E  & D  & C  & B  & A  \\ \hline
+0  & 0    & 0    & 0    & 0   & 0   & 1  & 1  & 1  & 1  & 1  & 1  \\
+1  & 0    & 0    & 0    & 1   & 0   & 0  & 0  & 0  & 1  & 1  & 0  \\
+2  & 0    & 0    & 1    & 0   & 1   & 0  & 1  & 1  & 0  & 1  & 1  \\
+3  & 0    & 0    & 1    & 1   & 1   & 0  & 0  & 1  & 1  & 1  & 1  \\
+4  & 0    & 1    & 0    & 0   & 1   & 1  & 0  & 0  & 1  & 1  & 0  \\
+5  & 0    & 1    & 0    & 1   & 1   & 1  & 0  & 1  & 1  & 0  & 1  \\
+6  & 0    & 1    & 1    & 0   & 1   & 1  & 1  & 1  & 1  & 0  & 1  \\
+7  & 0    & 1    & 1    & 1   & 0   & 0  & 0  & 0  & 1  & 1  & 1  \\
+8  & 1    & 0    & 0    & 0   & 1   & 1  & 1  & 1  & 1  & 1  & 1  \\
+9  & 1    & 0    & 0    & 1   & 1   & 1  & 0  & 1  & 1  & 1  & 1  \\
+10 & 1    & 0    & 1    & 0   & x   & x  & x  & x  & x  & x  & x  \\
+11 & 1    & 0    & 1    & 1   & x   & x  & x  & x  & x  & x  & x  \\
+12 & 1    & 1    & 0    & 0   & x   & x  & x  & x  & x  & x  & x  \\
+13 & 1    & 1    & 0    & 1   & x   & x  & x  & x  & x  & x  & x  \\
+14 & 1    & 1    & 1    & 0   & x   & x  & x  & x  & x  & x  & x  \\
+15 & 1    & 1    & 1    & 1   & x   & x  & x  & x  & x  & x  & x  \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{Karnaugh}
+\path (name) node {G}; \contingut{0,0,1,1,1,1,1,0,1,1,x,x,x,x,x,x}
+\grp{12}{10}{orange}
+\grp{2}{10}{green}
+\grp{4}{13}{purple}
+\grph{3}{10}{blue}
+\end{Karnaugh}
+%
+\begin{Karnaugh}
+\path (name) node {F}; \contingut{1,0,0,0,1,1,1,0,1,1,x,x,x,x,x,x}
+\grp{0}{8}{green}
+\grp{12}{10}{orange}
+\grp{4}{13}{purple}
+\grpv{4}{14}{blue}
+\end{Karnaugh}
+
+\begin{Karnaugh}
+\path (name) node {E}; \contingut{1,0,1,0,0,0,1,0,1,0,x,x,x,x,x,x}
+\grp{1}{11}{orange}
+\grp{4}{13}{green}
+\end{Karnaugh}
+%
+\begin{Karnaugh}
+\path (name) node {D}; \contingut{1,0,1,1,0,1,1,0,1,1,x,x,x,x,x,x}
+\end{Karnaugh}
+
+\begin{Karnaugh}
+\path (name) node {C}; \contingut{1,1,0,1,1,1,1,1,1,1,x,x,x,x,x,x}
+\end{Karnaugh}
+%    
+\begin{Karnaugh}
+\path (name) node {B}; \contingut{1,1,1,1,1,0,0,1,1,1,x,x,x,x,x,x}
+\end{Karnaugh}
+
+\begin{Karnaugh}
+\path (name) node {A}; \contingut{1,0,1,1,0,1,1,1,1,1,x,x,x,x,x,x}
+\end{Karnaugh}    
+
 \subsection{Symulacja w Multisimie.}
 \subsection{Implementacja w HDL.}
 Aby zaimplementować dekoder w Verilogu wystarczy podać, jakiego
