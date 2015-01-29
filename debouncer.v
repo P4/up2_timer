@@ -11,8 +11,8 @@
 module debouncer 
 (
 	input clk, // zegar (np. globalny 25,175MHz)
-	input btn,  // przycisk chwilowy, wcisniety = stan 0
-	output reg out // stan przycisku, wcisniety = stan 0
+	input btn,
+	output reg out
 );
 
 // licznik N-bitowy
