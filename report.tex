@@ -7,6 +7,7 @@
 \usepackage[pdftex]{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{matrix,calc}
+\usepackage{amsmath}
 
 \newcommand{\startstop}{\texttt{START/STOP}}
 \newcommand{\reset}{\texttt{RESET}}
@@ -100,6 +101,8 @@
   breakatwhitespace=true,
   tabsize=3
 }
+
+%% START:
 
 \title{
 	\textbf{Technika cyfrowa}
@@ -299,20 +302,21 @@ N  & Q3   & Q2   & Q1   & Q0  & G   & F  & E  & D  & C  & B  & A  \\ \hline
 \end{tabular}
 \end{table}
 
+\begin{figure}[p] \caption{Tabele Karnaugh dla poszczególnych wyjść dekodera BCD na wyświetlacz 7-segmentowy} \centering
 \begin{Karnaugh}
 \path (name) node {G}; \contingut{0,0,1,1,1,1,1,0,1,1,x,x,x,x,x,x}
 \grp{12}{10}{orange}
 \grp{2}{10}{green}
-\grp{4}{13}{purple}
 \grph{3}{10}{blue}
+\grp[3pt]{4}{13}{red}
 \end{Karnaugh}
 %
 \begin{Karnaugh}
 \path (name) node {F}; \contingut{1,0,0,0,1,1,1,0,1,1,x,x,x,x,x,x}
 \grp{0}{8}{green}
 \grp{12}{10}{orange}
-\grp{4}{13}{purple}
 \grpv{4}{14}{blue}
+\grp[3pt]{4}{13}{red}
 \end{Karnaugh}
 
 \begin{Karnaugh}
@@ -323,19 +327,47 @@ N  & Q3   & Q2   & Q1   & Q0  & G   & F  & E  & D  & C  & B  & A  \\ \hline
 %
 \begin{Karnaugh}
 \path (name) node {D}; \contingut{1,0,1,1,0,1,1,0,1,1,x,x,x,x,x,x}
+\grpone{4}{orange}
+\grpone{1}{green}
+\grpone{7}{blue}
 \end{Karnaugh}
 
 \begin{Karnaugh}
 \path (name) node {C}; \contingut{1,1,0,1,1,1,1,1,1,1,x,x,x,x,x,x}
+\grpone{2}{orange}
 \end{Karnaugh}
 %    
 \begin{Karnaugh}
 \path (name) node {B}; \contingut{1,1,1,1,1,0,0,1,1,1,x,x,x,x,x,x}
+\grph{0}{10}{orange}
+\grp{0}{8}{green}
+\grp{3}{11}{blue}
 \end{Karnaugh}
 
 \begin{Karnaugh}
 \path (name) node {A}; \contingut{1,0,1,1,0,1,1,1,1,1,x,x,x,x,x,x}
+\grpone{4}{orange}
+\grpone{1}{green}
 \end{Karnaugh}    
+\end{figure}
+
+Dla każdego wyjścia sporządzamy osobną tabelę Karnaugh i na ich podstawie tworzymy funkcje logiczne:
+\begin{align*}
+A &= (Q_3 + \n{Q_2} + Q_1 + Q_0)(Q_3 + Q_2 + Q_1 + \n{Q_0}) &
+  A &= Q_3 + Q_1 + \n{Q_2 \oplus Q_0} \\
+B &= \n{Q_2} + Q_1Q_0 + \n{Q_1}\n{Q_0} &
+  B &= \n{Q_2 (Q_1 \oplus Q_0)} \\
+C &= Q_3 + Q_2 + \n{Q_1} + Q_0 &
+  C &= Q_3 + Q_2 + \n{Q_1} + Q_0 \\
+D &= A(Q_3 + \n{Q_2} + \n{Q_1} + \n{Q_0}) &
+  D &= A(Q_3 + \n{Q_2 Q_1 Q_0})\\
+E &= (\n{Q_0})(Q_1+\n{Q_2}) &
+  E &= \n{Q_0 + \n{Q_1}Q_2 } \\
+F &= Q_3 + Q_2\n{Q_1} + Q_2\n{Q_0} + \n{Q_1}\cdot\n{Q_0} &
+  F &= Q_3 + \n{Q_1+Q_0} + Q_2\cdot\n{Q_1Q_0} \\
+G &= Q_3 + \n{Q_0}Q_1 + Q_1\n{Q_2} + \n{Q_1}Q_2 &
+  G &= Q_3 + \n{Q_0}Q_1 + (Q_1 \oplus Q_2)   \\
+\end{align*}
 
 \subsection{Symulacja w Multisimie.}
 \subsection{Implementacja w HDL.}

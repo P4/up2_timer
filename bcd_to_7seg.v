@@ -1,17 +1,7 @@
 module bcd_to_7seg (
-
-input [3:0] IN,
-output reg [6:0] OUT //abcdefg
-
+	input [3:0] IN,
+	output reg [6:0] OUT
 );
-
-//  aa
-// f  b
-// f  b
-//  gg
-// e  c
-// e  c
-//  dd
 
 always@(IN)
 case(IN) //		 gfedcba
