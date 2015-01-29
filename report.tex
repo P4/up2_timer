@@ -2,11 +2,40 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage{polski}
+\usepackage{color}
+\usepackage{listings}
 
 \newcommand{\startstop}{\texttt{START/STOP}}
 \newcommand{\reset}{\texttt{RESET}}
 \newcommand{\addmin}{\texttt{ADD\textunderscore MIN}}
 \newcommand{\addsec}{\texttt{ADD\textunderscore SEC}}
+\newcommand{\clocksec}{\texttt{clock\textunderscore sec}}
+\newcommand{\debouncer}{\texttt{debouncer}}
+\newcommand{\counter}[1]{\texttt{counter\textunderscore #1}}
+\newcommand{\mode}{\texttt{mode}}
+\newcommand{\bcdtoseg}{\texttt{bcd\textunderscore to\textunderscore 7seg}}
+\newcommand{\tff}{\texttt{t\textunderscore ff}}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Verilog,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
 
 \title{
 	\textbf{Technika cyfrowa}
@@ -25,8 +54,7 @@
 \tableofcontents
 
 \chapter{Instrukcja użytkownika}
-\section{Opis działania}
-
+\section{Opis działania.}
 Celem projektu jest \emph{timer} zrealizowany na zestawie
 edukacyjnym Altera UP2.
 
@@ -43,14 +71,74 @@ W tym trybie zliczanie czasu jest zatrzymane. Możliwe jest
 dodawanie minut i/lub sekund do licznika przyciskami \addmin\ i
 \addsec\ oraz zresetowanie jego stanu przyciskiem \reset .
 \end{enumerate}
-Gdy licznik osiągnie stan \texttt{00:00}, układ zasygnalizuje to
-miganiem kropek na wyświetlaczu LED. Po wciśnięciu przycisku
-\startstop\ timer powróci do trybu \emph{ustawiania}.
-\section{Opis interfejsu użytkownika}
+Gdy licznik podczas zliczania osiągnie stan \texttt{00:00}, układ
+zasygnalizuje to miganiem kropek na wyświetlaczu LED. Po
+wciśnięciu przycisku \startstop\ timer powróci do trybu
+\emph{ustawiania}.
+\section{Opis interfejsu użytkownika.}
 % tu można wstawić rysunek układu
 
 \chapter{Realizacja projektu}
-\section{Symulacja układu w Multisimie}
-\section{Implementacja układu w HDL}
+\section{Układ timera.}
+\subsection{Ogólny schemat.}
+\subsection{Implementacja w HDL.}
+Poniżej przedstawiamy nadrzędny plik źródłowy projektu napisany w
+języku Verilog. Występują w nim odniesienia do modułów, które
+zostaną opisane w dalszej części sprawozdania.
+
+\lstinputlisting{UP2_TOP.v}
+\section{Zegar 1Hz (\clocksec).}
+\subsection{Opis układu.}
+Do realizacji timera kluczowym elementem był \emph{zegar 1Hz}.
+Umożliwia on dokładne odmierzenie jednej sekundy.
+
+Układ ten to prosty licznik na zegarze o częstotliwości 25,175MHz
+z 24-bitowym rejestrem. Wyjście zegara sekundowego połączone
+jest z ostatnim (najstarszym) bitem rejestru. Rejestr jest
+zerowany, gdy licznik osiąga \texttt{FREQ-1}, co powoduje, że
+częstotliwość występowania zbocza wynosi 1Hz. Należy jednak
+zaznaczyć, że wypełnienie zegara \emph{nie} jest równe 50\% .
+\subsection{Implementacja w HDL.}
+Z powodu zbyt dużego skomplikowania tego układu nie wykonaliśmy
+symulacji w Multisimie. Poniżej zamieszczamy implementację zegara
+1Hz w Verilogu.
+
+\lstinputlisting{clock_sec.v}
+\section{Debouncer (\debouncer).}
+\subsection{Opis układu.}
+Podczas realizacji naszego projektu jednym z pierwszych problemów,
+na jakie się natknęliśmy, były zakłócenia na stykach przycisków,
+które występują w czasie naciskania. Dość szybko zdaliśmy sobie
+sprawę, że potrzebujemy układu, który znany jest pod nazwą
+\emph{debouncer}.
+
+Jego działanie polega na tym, że stan na jego wyjściu zmienia się
+dopiero wtedy, gdy zmiana stanu przycisku jest trwała, tj.\
+trwa przez określony czas. Dzięki temu, sygnał na wyjściu
+debouncera jest pozbawiony drgań.
+\subsection{Implementacja w HDL.}
+W naszym projekcie zakładamy, że wszystkie wejścia doprowadzone z
+przycisków są już zdebouncowane. Poniżej przedstawiamy jedynie
+implementację w Verilogu.
+
+\lstinputlisting{debouncer.v}
+\section{Liczniki (\counter{6}, \counter{10}).}
+\subsection{Opis układu.}
+\emph{Liczniki} to serce naszego układu. Odliczają w dół lub w
+górę, w zależności od trybu, w którym znajduje się timer. Mogą też
+zostać wyzerowane asynchronicznie wejściem \texttt{CLR}. Liczniki
+są połączone ze sobą tak, aby po nastąpieniu \emph{przepełnienia}
+--- wzrósł, zaś w przypadku \emph{niedomiaru} --- zmalał stan
+licznika odpowiadającego za starszą cyfrę.
+\subsection{Symulacja w Multisimie.}
+\subsection{Implementacja w HDL.}
+\section{Kontrola trybów (\mode).}
+\subsection{Opis układu.}
+\subsection{Symulacja w Multisimie.}
+\subsection{Implementacja w HDL.}
+\section{Dekoder BCD na wyświetlacz 7-segmentowy (\bcdtoseg).}
+\subsection{Opis układu.}
+\subsection{Symulacja w Multisimie.}
+\subsection{Implementacja w HDL.}
 
 \end{document}
