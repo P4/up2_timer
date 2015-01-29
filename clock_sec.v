@@ -1,7 +1,3 @@
-// Zegar o okresie 1 sekundy, czestotliwosci 1Hz
-
-// Uwaga: Wypelnienie nie jest rowne 50%.
-
 module clock_sec
 (
 	MCLK, 	// Wejscie zegara globalnego 25.175 MHz

@@ -1,7 +1,3 @@
-// Debouncer do przyciskow
-// przycisk musi byc aktywny/nieaktywny przez minimalny czas,
-// zeby zarejsetrowala sie zmiana stanu.
-
 // Minimalny czas P potwierdzajacy stabilnosc wyraza wzor:
 //     P = 2^N / f
 // zakladamy czas ok. 10ms,
