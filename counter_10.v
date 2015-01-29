@@ -1,19 +1,17 @@
-// Licznik dekadowy dwukierunkowy z flagami pozyczki i przeniesienia
-
 module counter_10 (
-    // wejœcia aktywowane zboczem narastaj¹cym
-    // w chwili aktywacji jednego wejœcia
-    // drugie musi byæ w stanie wysokim
+    // wejscia aktywowane zboczem narastajacym
+    // w chwili aktywacji jednego wejscia
+    // drugie musi byc w stanie wysokim
 
     INC, // Q = Q+1
     DEC, // Q = Q-1
 
-    // zerowanie, niezale¿nie od wejœæ INC,DEC
+    // zerowanie, niezaleznie od wejsc INC,DEC
     CLR, // zerowanie stanem wysokim
 
     Q,   // aktualny stan Q, wartosci 0..9
 
-    // flagi zachowuj¹ siê jak wejœcia INC, DEC
+    // flagi zachowuja sie jak wejscia INC, DEC
     CARRY, // przeniesienie
     BORROW // pozyczka
 );

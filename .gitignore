@@ -41,7 +41,6 @@ multisim/* (Security copy)
 *.nav
 *.nlo
 *.out
-*.pdf
 *.pdfsync
 *.ps
 *.snm
@@ -50,3 +49,5 @@ multisim/* (Security copy)
 *.vrb
 *.xdy
 *.tdo
+report.pdf
+

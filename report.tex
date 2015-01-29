@@ -4,6 +4,7 @@
 \usepackage{polski}
 \usepackage{color}
 \usepackage{listings}
+\usepackage[pdftex]{graphicx}
 
 \newcommand{\startstop}{\texttt{START/STOP}}
 \newcommand{\reset}{\texttt{RESET}}
@@ -52,6 +53,7 @@
 \maketitle
 
 \tableofcontents
+\listoffigures
 
 \chapter{Instrukcja użytkownika}
 \section{Opis działania.}
@@ -139,12 +141,62 @@ zostać wyzerowane asynchronicznie wejściem \texttt{CLR}. Liczniki
 są połączone ze sobą tak, aby po nastąpieniu \emph{przepełnienia}
 --- wzrósł, zaś w przypadku \emph{niedomiaru} --- zmalał stan
 licznika odpowiadającego za starszą cyfrę.
+
+\counter{6} to licznik modulo 6, zaś \counter{10} --- modulo 10.
 \subsection{Symulacja w Multisimie.}
 \subsection{Implementacja w HDL.}
+Implementacja liczników w Verilogu to wyrażenie wcześniej
+przedstawionych schematów w języku opisu sprzętu.
+
+\lstinputlisting[title=\counter{6}.v]{counter_6.v}
+\lstinputlisting[title=\counter{10}.v]{counter_10.v}
 \section{Kontrola trybów (\mode).}
 \subsection{Opis układu.}
+Podczas projektowania układu ustaliliśmy, że timer będzie się mógł
+znajdować w jednym z trzech \emph{trybów}: \texttt{RUN},
+\texttt{HALT} i \texttt{BLINK} (wyjaśnienie poniżej). Dwa pierwsze
+tryby mają większe znaczenie dla użytkownika i zostały opisane w
+instrukcji, zaś trzeci z nich został wprowadzony po to, by
+umożliwić sygnalizację zakończenia zliczania (miganie kropek
+na wyświetlaczu LED).
+
+Z bardzo prostych obliczeń wynika, że chcąc zapamiętać 3 stany
+potrzebujemy dwóch przerzutników. Nazwaliśmy je: \texttt{running} i
+\texttt{ended}. Poniżej przedstawiony jest krótki opis znaczenia
+każdego stanu wraz z przypisaną do niego 2-bitową wartością
+rejestru \{\texttt{running}, \texttt{ended}\}:
+\begin{enumerate}
+\item \texttt{RUN} \{1,0\} --- tryb \emph{zliczania} --- liczniki
+zliczają czas w dół, działanie wszystkich przycisków poza
+\startstop\ jest zablokowane,
+\item \texttt{HALT} \{0,0\} --- tryb \emph{ustawiania} --- liczniki
+są zatrzymane, w tym trybie można dodawać minuty i sekundy, a także
+resetować stan liczników,
+\item \texttt{BLINK} \{0,1\} --- tryb \emph{migania} --- liczniki
+są zatrzymane, działanie wszystkich przycisków poza \startstop\
+jest zablokowane, a kropki na wyświetlaczu LED migają sygnalizując
+koniec zliczania.
+\end{enumerate}
+
+Rysunek \ref{state_diagram} prezentuje przejścia pomiędzy trybami.
+\begin{figure}[p]
+\centering
+\includegraphics{state_diagram.pdf}
+\caption[Diagram przejść pomiędzy trybami timera.]{Diagram przejść
+pomiędzy trybami timera. \startstop\ oznacza zdarzenie naciśnięcia
+przycisku \startstop , \texttt{END} oznacza zdarzenie zakończenia
+zliczania.}
+\label{state_diagram}
+\end{figure}
 \subsection{Symulacja w Multisimie.}
 \subsection{Implementacja w HDL.}
+Zaimplementowaliśmy powyższy schemat w Verilogu. Sygnały
+\startstop\ oraz \texttt{END} doprowadzone są do układu
+odpowiednio poprzez wejścia: \texttt{btn} i
+\texttt{end\textunderscore}. Na wyjście podawany jest stan
+przerzutników \texttt{running} i \texttt{ended}.
+
+\lstinputlisting[title=\texttt{mode.v}]{mode.v}
 \section{Dekoder BCD na wyświetlacz 7-segmentowy (\bcdtoseg).}
 \subsection{Opis układu.}
 Aby użytkownik mógł widzieć stan timera na wyświetlaczu LED,
