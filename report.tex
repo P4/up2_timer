@@ -9,6 +9,8 @@
 \usetikzlibrary{matrix,calc}
 \usepackage{amsmath}
 
+\usepackage[section]{placeins} % prevent float from moving to next section
+
 \newcommand{\startstop}{\texttt{START/STOP}}
 \newcommand{\reset}{\texttt{RESET}}
 \newcommand{\addmin}{\texttt{ADD\textunderscore MIN}}
@@ -143,6 +145,8 @@ Gdy licznik podczas zliczania osiągnie stan \texttt{00:00}, układ
 zasygnalizuje to miganiem cyfr na wyświetlaczach LED. Po
 wciśnięciu przycisku \startstop\ timer powróci do trybu
 \emph{ustawiania}.
+
+\pagebreak
 \section{Opis interfejsu użytkownika.}
 Aktualny stan timera w fromacie \texttt{MM.SS} wyświetlany jest na czterech wyświetlaczach 
 7-segmentowych znajdujących się na \emph{płytce rozszerzeń C}. 
@@ -191,12 +195,6 @@ przycisku \addmin , zaś do dekrementacji --- pożyczka z sekundowej
 cyfry jedności. Oprócz tego, wszystkie liczniki posiadają wejście
 \texttt{CLR}, które służy do \emph{asynchronicznego} resetowania
 stanu. Do tych wejść podłączony jest przycisk \reset .
-\begin{figure}[p]
-\centering
-\includegraphics[width=\textwidth]{multisim/timer.png}
-\caption[Uproszczony schemat timera.]{Uproszczony schemat timera w programie Multisim.}
-\label{timer_scheme}
-\end{figure}
 \subsection{Implementacja w HDL.}
 Poniżej przedstawiamy nadrzędny plik źródłowy projektu napisany w
 języku Verilog. Występują w nim odniesienia do modułów, które
@@ -204,6 +202,14 @@ zostaną opisane w dalszej części sprawozdania.
 Pewne fragmenty zostały pominięte dla poprawy czytelności
 
 \lstinputlisting[title=\texttt{UP2\textunderscore TOP.v}]{UP2_TOP_simp.v}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{multisim/timer.png}
+\caption[Uproszczony schemat timera.]{Uproszczony schemat timera w programie Multisim.}
+\label{timer_scheme}
+\end{figure}
+
 \section{Zegar 1Hz (\clocksec).}
 \subsection{Opis układu.}
 Do realizacji timera kluczowym elementem był \emph{zegar 1Hz},
@@ -222,7 +228,9 @@ Z powodu zbyt dużego skomplikowania tego układu nie wykonaliśmy
 symulacji w Multisimie. Poniżej zamieszczamy implementację zegara
 1Hz w Verilogu.
 
+\pagebreak
 \lstinputlisting[title=\clocksec .v]{clock_sec.v}
+
 \section{Debouncer (\debouncer).}
 \subsection{Opis układu.}
 Podczas realizacji naszego projektu jednym z pierwszych problemów,
@@ -249,8 +257,9 @@ Dla zegara 25,175MHz daje nam to $N=18$\ ($P=10,41$ms)
 \subsection{Implementacja w HDL.}
 Przełączniki stosowane przez nas w Multisimie na szczęście nie wymagają
 debouncera. Poniżej przedstawiamy implementację w Verilogu.
-
+\pagebreak
 \lstinputlisting[title=\debouncer .v]{debouncer.v}
+
 \section{Liczniki (\counter{6}, \counter{10}).}
 \subsection{Opis układu.}
 \emph{Liczniki} to serce naszego układu. Odliczają w dół lub w
@@ -265,7 +274,8 @@ licznika odpowiadającego za starszą cyfrę.
 Licznik modulo 6 to układ \emph{sekwencyjny} zbudowany na trzech
 przerzutnikach. Sygnał podawany na wejście każdego przerzutnika jest
 \emph{dekodowany} na podstawie aktualnego stanu wyjść licznika. Schemat pokazany jest na rysunku \ref{counter6_scheme}.
-\begin{figure}[p]
+
+\begin{figure}[h]
 \centering
 \includegraphics[width=\textwidth]{multisim/counter6.png}
 \caption[Schemat licznika modulo 6.]{Schemat licznika modulo 6 w programie Multisim.}
@@ -276,12 +286,14 @@ Licznik modulo 10 jest zbudowany podobnie. Główną różnicą jest tutaj
 zastosowanie czterech przerzutników, co pozwala na zapamiętanie
 wszystkich cyfr systemu dziesiętnego. Schemat na rysunku
 \ref{counter10_scheme}.
-\begin{figure}[p]
+\begin{figure}[h]
 \centering
 \includegraphics[width=\textwidth]{multisim/counter10.png}
 \caption[Schemat licznika modulo 10.]{Schemat licznika modulo 10 w programie Multisim.}
 \label{counter10_scheme}
 \end{figure}
+
+\pagebreak
 \subsection{Implementacja w HDL.}
 Implementacja liczników w Verilogu to wyrażenie wcześniej
 przedstawionych schematów w języku opisu sprzętu.
@@ -349,7 +361,7 @@ odróżnieniu od układów \emph{sekwencyjnych}. Stan każdego wyjścia
 jest opisany funkcją bool'owską, które realizowane są za pomocą
 bramek logicznych.
 
-\begin{table}[htbp] \caption{Tabela stanów logicznych} \label{decoder-table} \centering
+\begin{table}[htbp] \centering
 \begin{tabular}{|c|cccc|ccccccc|} 
 \hline 
 & \multicolumn{4}{c|}{BCD} & \multicolumn{7}{c|}{7 segmentowy} \\
@@ -371,9 +383,11 @@ N  & Q3   & Q2   & Q1   & Q0  & G   & F  & E  & D  & C  & B  & A  \\ \hline
 14 & 1    & 1    & 1    & 0   & x   & x  & x  & x  & x  & x  & x  \\
 15 & 1    & 1    & 1    & 1   & x   & x  & x  & x  & x  & x  & x  \\ \hline
 \end{tabular}
+\caption{Stany logiczne wyjść dla poszczególnych segmentów} 
+\label{decoder_table} 
 \end{table}
 
-\begin{figure}[p] \caption{Tabele Karnaugh dla poszczególnych wyjść dekodera BCD na wyświetlacz 7-segmentowy.} \centering
+\begin{figure}[h] \centering
 \begin{Karnaugh}
 \path (name) node {G}; \contingut{0,0,1,1,1,1,1,0,1,1,x,x,x,x,x,x}
 \grp{12}{10}{orange}
@@ -419,10 +433,12 @@ N  & Q3   & Q2   & Q1   & Q0  & G   & F  & E  & D  & C  & B  & A  \\ \hline
 \path (name) node {A}; \contingut{1,0,1,1,0,1,1,1,1,1,x,x,x,x,x,x}
 \grpone{4}{orange}
 \grpone{1}{green}
-\end{Karnaugh}    
+\end{Karnaugh} 
+\caption{Tabele Karnaugh dla poszczególnych wyjść dekodera BCD na wyświetlacz 7-segmentowy.}
+\label{karnaugh_maps}
 \end{figure}
 
-Dla każdego wyjścia sporządzamy osobną tabelę Karnaugh i na ich podstawie tworzymy funkcje logiczne:
+Dla każdego wyjścia sporządzamy osobną tabelę Karnaugh (rysunek \ref{karnaugh_maps})  i na ich podstawie tworzymy funkcje logiczne:
 \begin{align*}
 A &= (Q_3 + \n{Q_2} + Q_1 + Q_0)(Q_3 + Q_2 + Q_1 + \n{Q_0}) &
   A &= Q_3 + Q_1 + \n{Q_2 \oplus Q_0} \\
