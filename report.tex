@@ -119,6 +119,7 @@
 \maketitle
 
 \tableofcontents
+\listoffigures
 
 \chapter{Instrukcja użytkownika}
 \section{Opis działania.}
@@ -143,14 +144,29 @@ zasygnalizuje to miganiem kropek na wyświetlaczu LED. Po
 wciśnięciu przycisku \startstop\ timer powróci do trybu
 \emph{ustawiania}.
 \section{Opis interfejsu użytkownika.}
-% tu można wstawić rysunek układu
+Interfejs użytkownika składa się z:
+\begin{itemize}
+\item Przycisków:
+	\begin{itemize}
+	\item \startstop\ --- zatrzymywanie/uruchamianie timera
+	\item \addsec\ --- dodawanie sekund do licznika (tylko w trybie
+		\emph{ustawiania})
+	\item \addmin\ --- dodawanie minut do licznika (tylko w trybie
+		\emph{ustawiania})
+	\item \reset\ --- resetowanie timera (tylko w trybie
+		\emph{ustawiania})
+	\end{itemize}
+\item Czterech 7-segmentowych wyświetlaczy LED --- wyświetlanie
+bieżącego stanu timera.
+\end{itemize}
 
 \chapter{Realizacja projektu}
 \section{Układ timera.}
 \subsection{Ogólny schemat.}
 Układ timera oparty jest na czterech licznikach: dwóch licznikach
-modulo 6 oraz dwóch --- modulo 10. Poniżej przedstawiamy
-uproszczony schemat układu, który ułatwia zrozumienie jego idei.
+modulo 6 oraz dwóch --- modulo 10. Na rysunku \ref{timer_scheme}
+przedstawiamy uproszczony schemat układu, który ułatwia zrozumienie
+jego idei.
 
 Każdy licznik odpowiada za jedną z cyfr wg schematu: \texttt{MM:SS}.
 Cyfry jedności należą do przedziału [0..9], zaś cyfry dziesiątek ---
@@ -167,8 +183,12 @@ przycisku \addmin , zaś do dekrementacji --- pożyczka z sekundowej
 cyfry jedności. Oprócz tego, wszystkie liczniki posiadają wejście
 \texttt{CLR}, które służy do \emph{asynchronicznego} resetowania
 stanu. Do tych wejść podłączony jest przycisk \reset .
-\\ \\
+\begin{figure}[p]
+\centering
 \includegraphics[width=\textwidth]{multisim/timer.png}
+\caption[Uproszczony schemat timera.]{Uproszczony schemat timera w programie Multisim.}
+\label{timer_scheme}
+\end{figure}
 \subsection{Implementacja w HDL.}
 Poniżej przedstawiamy nadrzędny plik źródłowy projektu napisany w
 języku Verilog. Występują w nim odniesienia do modułów, które
@@ -232,14 +252,24 @@ licznika odpowiadającego za starszą cyfrę.
 \subsection{Symulacja w Multisimie.}
 Licznik modulo 6 to układ \emph{sekwencyjny} zbudowany na trzech
 przerzutnikach. Sygnał podawany na wejście każdego przerzutnika jest
-\emph{dekodowany} na podstawie aktualnego stanu wyjść licznika.
-\\ \\
+\emph{dekodowany} na podstawie aktualnego stanu wyjść licznika. Schemat pokazany jest na rysunku \ref{counter6_scheme}.
+\begin{figure}[p]
+\centering
 \includegraphics[width=\textwidth]{multisim/counter6.png}
+\caption[Schemat licznika modulo 6.]{Schemat licznika modulo 6 w programie Multisim.}
+\label{counter6_scheme}
+\end{figure}
+
 Licznik modulo 10 jest zbudowany podobnie. Główną różnicą jest tutaj
 zastosowanie czterech przerzutników, co pozwala na zapamiętanie
-wszystkich cyfr systemu dziesiętnego.
-\\ \\
+wszystkich cyfr systemu dziesiętnego. Schemat na rysunku
+\ref{counter10_scheme}.
+\begin{figure}[p]
+\centering
 \includegraphics[width=\textwidth]{multisim/counter10.png}
+\caption[Schemat licznika modulo 10.]{Schemat licznika modulo 10 w programie Multisim.}
+\label{counter10_scheme}
+\end{figure}
 \subsection{Implementacja w HDL.}
 Implementacja liczników w Verilogu to wyrażenie wcześniej
 przedstawionych schematów w języku opisu sprzętu.
@@ -284,7 +314,6 @@ przycisku \startstop , \texttt{END} oznacza zdarzenie zakończenia
 zliczania.}
 \label{state_diagram}
 \end{figure}
-\subsection{Symulacja w Multisimie.}
 \subsection{Implementacja w HDL.}
 Zaimplementowaliśmy powyższy schemat w Verilogu. Sygnały
 \startstop\ oraz \texttt{END} doprowadzone są do układu
@@ -308,7 +337,7 @@ odróżnieniu od układów \emph{sekwencyjnych}. Stan każdego wyjścia
 jest opisany funkcją bool'owską, które realizowane są za pomocą
 bramek logicznych.
 
-\begin{table}[h] \caption{Tabela stanów logicznych} \label{decoder-table} \centering
+\begin{table}[htbp] \caption{Tabela stanów logicznych} \label{decoder-table} \centering
 \begin{tabular}{|c|cccc|ccccccc|} 
 \hline 
 & \multicolumn{4}{c|}{BCD} & \multicolumn{7}{c|}{7 segmentowy} \\
@@ -332,7 +361,7 @@ N  & Q3   & Q2   & Q1   & Q0  & G   & F  & E  & D  & C  & B  & A  \\ \hline
 \end{tabular}
 \end{table}
 
-\begin{figure}[p] \caption{Tabele Karnaugh dla poszczególnych wyjść dekodera BCD na wyświetlacz 7-segmentowy} \centering
+\begin{figure}[p] \caption{Tabele Karnaugh dla poszczególnych wyjść dekodera BCD na wyświetlacz 7-segmentowy.} \centering
 \begin{Karnaugh}
 \path (name) node {G}; \contingut{0,0,1,1,1,1,1,0,1,1,x,x,x,x,x,x}
 \grp{12}{10}{orange}
@@ -400,7 +429,14 @@ G &= Q_3 + \n{Q_0}Q_1 + Q_1\n{Q_2} + \n{Q_1}Q_2 &
 \end{align*}
 
 \subsection{Symulacja w Multisimie.}
+Na rysunku \ref{decoder_scheme} przedstawiamy implementację
+uzyskanych funkcji na bramkach logicznych w programie Multisim.
+\begin{figure}[p]
+\centering
 \includegraphics[width=\textwidth]{multisim/bcdto7seg.png}
+\caption[Schemat dekodera BCD na wyświetlacz 7-segmentowy.]{Schemat dekodera BCD na wyświetlacz 7-segmentowy w programie Multisim.}
+\label{decoder_scheme}
+\end{figure}
 \subsection{Implementacja w HDL.}
 Aby zaimplementować dekoder w Verilogu wystarczy podać, jakiego
 zestawu stanów na wyjściu oczekujemy dla każdego zestawu stanów na
