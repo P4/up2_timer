@@ -205,7 +205,7 @@ Pewne fragmenty zostały pominięte dla poprawy czytelności
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\textwidth]{multisim/timer.png}
+\includegraphics[width=\textwidth]{timer.png}
 \caption[Uproszczony schemat timera.]{Uproszczony schemat timera w programie Multisim.}
 \label{timer_scheme}
 \end{figure}
@@ -229,7 +229,7 @@ symulacji w Multisimie. Poniżej zamieszczamy implementację zegara
 1Hz w Verilogu.
 
 \pagebreak
-\lstinputlisting[title=\clocksec .v]{clock_sec.v}
+\lstinputlisting[title=\clocksec .v]{../clock_sec.v}
 
 \section{Debouncer (\debouncer).}
 \subsection{Opis układu.}
@@ -258,7 +258,7 @@ Dla zegara 25,175MHz daje nam to $N=18$\ ($P=10,41$ms)
 Przełączniki stosowane przez nas w Multisimie na szczęście nie wymagają
 debouncera. Poniżej przedstawiamy implementację w Verilogu.
 \pagebreak
-\lstinputlisting[title=\debouncer .v]{debouncer.v}
+\lstinputlisting[title=\debouncer .v]{../debouncer.v}
 
 \section{Liczniki (\counter{6}, \counter{10}).}
 \subsection{Opis układu.}
@@ -277,7 +277,7 @@ przerzutnikach. Sygnał podawany na wejście każdego przerzutnika jest
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\textwidth]{multisim/counter6.png}
+\includegraphics[width=\textwidth]{counter6.png}
 \caption[Schemat licznika modulo 6.]{Schemat licznika modulo 6 w programie Multisim.}
 \label{counter6_scheme}
 \end{figure}
@@ -288,7 +288,7 @@ wszystkich cyfr systemu dziesiętnego. Schemat na rysunku
 \ref{counter10_scheme}.
 \begin{figure}[h]
 \centering
-\includegraphics[width=\textwidth]{multisim/counter10.png}
+\includegraphics[width=\textwidth]{counter10.png}
 \caption[Schemat licznika modulo 10.]{Schemat licznika modulo 10 w programie Multisim.}
 \label{counter10_scheme}
 \end{figure}
@@ -298,8 +298,8 @@ wszystkich cyfr systemu dziesiętnego. Schemat na rysunku
 Implementacja liczników w Verilogu to wyrażenie wcześniej
 przedstawionych schematów w języku opisu sprzętu.
 
-\lstinputlisting[title=\counter{6}.v]{counter_6.v}
-\lstinputlisting[title=\counter{10}.v]{counter_10.v}
+\lstinputlisting[title=\counter{6}.v]{../counter_6.v}
+\lstinputlisting[title=\counter{10}.v]{../counter_10.v}
 \section{Kontrola trybów (\mode).}
 \subsection{Opis układu.}
 Podczas projektowania układu ustaliliśmy, że timer będzie się mógł
@@ -345,7 +345,7 @@ odpowiednio poprzez wejścia: \texttt{btn} i
 \texttt{end\textunderscore}. Na wyjście podawany jest stan
 przerzutników \texttt{running} i \texttt{ended}.
 
-\lstinputlisting[title=\texttt{mode.v}]{mode.v}
+\lstinputlisting[title=\texttt{mode.v}]{../mode.v}
 \section{Dekoder BCD na wyświetlacz 7-segmentowy (\bcdtoseg).}
 \subsection{Opis układu.}
 Aby użytkownik mógł widzieć stan timera na wyświetlaczu LED,
@@ -461,7 +461,7 @@ Na rysunku \ref{decoder_scheme} przedstawiamy implementację
 uzyskanych funkcji na bramkach logicznych w programie Multisim.
 \begin{figure}[p]
 \centering
-\includegraphics[width=\textwidth]{multisim/bcdto7seg.png}
+\includegraphics[width=\textwidth]{bcdto7seg.png}
 \caption[Schemat dekodera BCD na wyświetlacz 7-segmentowy.]{Schemat dekodera BCD na wyświetlacz 7-segmentowy w programie Multisim.}
 \label{decoder_scheme}
 \end{figure}
@@ -472,6 +472,6 @@ wejściu. Kompilator automatycznie będzie się starał zoptymalizować
 układ bramek logicznych realizujący podaną w ten sposób
 \emph{tabelę prawdy}.
 
-\lstinputlisting[title=\bcdtoseg .v]{bcd_to_7seg.v}
+\lstinputlisting[title=\bcdtoseg .v]{../bcd_to_7seg.v}
 
 \end{document}
